@@ -1,9 +1,13 @@
 const express = require('express');
 
+const AuthController = require('./controllers/AuthController');
 const ClientsController = require('./controllers/ClientsController');
 const GroupsController = require('./controllers/GroupsController');
 
 const routes = express.Router();
+
+routes.post('/user', AuthController.create);
+routes.post('/auth', AuthController.login);
 
 routes.get('/clients:cpf?', ClientsController.index);
 routes.post('/clients', ClientsController.create);

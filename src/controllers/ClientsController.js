@@ -13,26 +13,30 @@ module.exports = {
     },
 
     async create(req, res) {
-        const { name, type, cpf, rg, date, id_group, status, tel } = req.body;
+        try {
+            const { name, type, cpf, rg, date, id_group, status, tel } = req.body;
 
-        const client = await connection('users').insert({
-            name,
-            type,
-            cpf,
-            rg,
-            date,
-            id_group,
-            status
-        });
-
-        const phone = await tel.foreach((number) => {
-            connection('phones').insert({
-                tel: number,
-                cpf_client: cpf
+            const client = await connection('users').insert({
+                name,
+                type,
+                cpf,
+                rg,
+                date,
+                id_group,
+                status
             });
-        });
-
-        return res.json(client);
+    
+            const phone = await tel.foreach((number) => {
+                connection('phones').insert({
+                    tel: number,
+                    cpf_client: cpf
+                });
+            });
+    
+            return res.json(client);
+        } catch(err) {
+            res.send(err);
+        }
     },
 
     async update(req, res) {
