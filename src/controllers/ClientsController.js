@@ -4,8 +4,10 @@ module.exports = {
     async index(req, res) {
         try {
             const cpf = req.query.cpf;
-            const clients = cpf ? await connection('users').where('cpf', cpf).innerJoin('phones', 'users.cpf', 'phones.cpf_client') : await connection('users').select('*');
-         
+            const clients = cpf
+                ? await connection.table('users').where('cpf', cpf).leftJoin('phones', 'users.cpf', 'phones.cpf_client')
+                : await connection.table('users');
+
             return res.json(clients);
         } catch (err) {
             res.send(err);
@@ -25,16 +27,16 @@ module.exports = {
                 id_group,
                 status
             });
-    
+
             const phone = await tel.foreach((number) => {
                 connection('phones').insert({
                     tel: number,
                     cpf_client: cpf
                 });
             });
-    
+
             return res.json(client);
-        } catch(err) {
+        } catch (err) {
             res.send(err);
         }
     },
@@ -83,10 +85,21 @@ module.exports = {
                 return res.status(401).json({ error: 'Operation not permitted.' });
             }
 
-            await connection('users').where('cpf', cpf).del();
             await connection('phone').where('cpf_client', cpf).del();
+            await connection('users').where('cpf', cpf).del();
 
             return res.status(204).send();
+        } catch (err) {
+            res.send(err);
+        }
+    },
+
+    async indexPhone(req, res) {
+        try {
+            const cpf = req.query.cpf;
+            const phones = await connection.table('phones').where('cpf_client', cpf);
+
+            return res.json(phones);
         } catch (err) {
             res.send(err);
         }
